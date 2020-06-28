@@ -4,8 +4,7 @@ String.prototype.replaceAll = function(from, to){ return this.split(from).join(t
 const productListElement = document.querySelector('#lista-produtos');
 const cartListElement = document.querySelector('#lista-carrinho');
 const comprarButtonsElement = document.querySelectorAll('.action-buttons');
-const qtdInputElement = document.getElementsByClassName('qtd');
-const total = document.querySelector('#total')
+const totalElement = document.querySelector('#total');
 const templateElement = document.querySelector('#carrinho-item');
 const template = templateElement.innerHTML;
 
@@ -19,7 +18,7 @@ const cartHandler = {
     else throw 'O valor passado para storageHandler.setItems() deve ser Array';
   },
   getItemsFromCart: function () {
-    return (JSON.parse(this.storage.getItem(this.key) || '[]')).sort();
+    return (JSON.parse(this.storage.getItem(this.key) || '[]'));
   }
 };
 
@@ -27,13 +26,12 @@ const setCartItems = (arr) => {
   cartHandler.setCartItems(arr);
   cart = cartHandler.getItemsFromCart();
   render();
-}
+};
 
 
 const onAddItemClicked = (evt) => {
   if(evt.target.nodeName === 'BUTTON' && evt.target.attributes['data-id'])
   {
-    console.log('add');
     const data = [...evt.target.attributes];
     const product = data.reduce((obj, node) => {
       const attr = node.nodeName.replace('data-', '');
@@ -51,48 +49,43 @@ const addEventToComprarButton = (item) => {
 };
 
 
-const templateToHTML = (productName, price, template, id) => {
-  return template.replaceAll('{{NOME}}', productName).replaceAll('{{PRECO}}', price).replaceAll('{{ID}}', id);
+const templateToHTML = (template, item) => {
+  return template
+    .replaceAll('{{NOME}}', item.name)
+    .replaceAll('{{PRECO}}', item.price)
+    .replaceAll('{{ID}}', item.id)
+    .replaceAll('{{IMAGEM}}', item.image)
+    .replaceAll('{{QUANTIDADE}}', item.quantity);
 };
 
 
 const render = () => {
-  console.log('render');
-  const cartHTML = cart.map((value, index) => templateToHTML(value.name, value.price, template, index));
+  const cartHTML = cart.map((item) => templateToHTML(template, item));
   cartListElement.innerHTML = cartHTML.join('\n');
-  cart.map((value, index) => qtdInputElement[index].value === value.quantity);
+  const total = cart.reduce((acc, item) => acc += item.price * item.quantity, 0);
+  totalElement.innerText = total.toFixed(2).replace('.',',');
+
 };
 
 
 const onTrashClicked = (evt) => {  
   if(evt.target.nodeName === 'BUTTON')
   {
-    console.log('remove');
-    const index = parseInt(evt.target.attributes['data-id'].nodeValue);
-    setCartItems(cart.filter((v, i) => i !== index));
+    const id = parseInt(evt.target.attributes['data-id'].nodeValue);
+    const newCart = cart.filter((v) => parseInt(v.id) !== id);
+    setCartItems(newCart);
   }
 };
 
 const onQuantityEdited = (evt) => {
   if(evt.target.nodeName === 'INPUT')
   {
-    console.log('edit');
-    const index = parseInt(evt.target.attributes['data-id'].nodeValue);
+    const id = parseInt(evt.target.attributes['data-id'].nodeValue);
+    const index = cart.findIndex(item => parseInt(item.id) === id);
     cart[index].quantity = evt.target.value;
     setCartItems(cart);
   }
 };
-
-
-let cartTotal = cart.reduce(
-  (acc, item) => {
-    acc += parseInt(item.quantity) * parseFloat(item.price);
-    return acc;
-  }, 0.0
-);
-
-cartTotal.toFixed(2).replace('.',',');
-
 
 const init = () => {
   cart = cartHandler.getItemsFromCart();
@@ -103,6 +96,13 @@ const init = () => {
 };
 
 init();
+
+
+
+
+
+
+
 
 
 
