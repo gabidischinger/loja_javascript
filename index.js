@@ -32,19 +32,19 @@ const setCartItems = (arr) => {
 //cart.includes(data)
 
 const onAddItemClicked = (evt) => {
+  
+  const id = parseInt(evt.target.attributes['data-id'].nodeValue);
+  
   if(evt.target.nodeName === 'BUTTON' && evt.target.attributes['data-id'])
   {
-    if(cart.filter(item => item.id == evt.target.attributes['data-id']).length > 0)
+    if(cart.filter(item => parseInt(item.id) === id).length > 0)
     {
-      console.log('if');
-      const id = parseInt(evt.target.attributes['data-id'].nodeValue);
       const index = cart.findIndex(item => parseInt(item.id) === id);
-      cart[index].quantity = parseInt(cart[id].quantity) + 1;
+      cart[index].quantity = parseInt(cart[index].quantity) + 1;
       setCartItems(cart);
     } 
     else 
     {
-      console.log('else');
       const data = [...evt.target.attributes];
       const product = data.reduce((obj, node) => {
         const attr = node.nodeName.replace('data-', '');
