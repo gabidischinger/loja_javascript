@@ -28,19 +28,33 @@ const setCartItems = (arr) => {
   render();
 };
 
+//cart.filter(item => item.id === data.id)
+//cart.includes(data)
 
 const onAddItemClicked = (evt) => {
   if(evt.target.nodeName === 'BUTTON' && evt.target.attributes['data-id'])
   {
-    const data = [...evt.target.attributes];
-    const product = data.reduce((obj, node) => {
-      const attr = node.nodeName.replace('data-', '');
-      const value = node.nodeValue;
-      obj[attr] = value;
-      return obj;
-    }, {});
-    const newCart = [...cart, product];
-    setCartItems(newCart);
+    if(cart.filter(item => item.id == evt.target.attributes['data-id']).length > 0)
+    {
+      console.log('if');
+      const id = parseInt(evt.target.attributes['data-id'].nodeValue);
+      const index = cart.findIndex(item => parseInt(item.id) === id);
+      cart[index].quantity = parseInt(cart[id].quantity) + 1;
+      setCartItems(cart);
+    } 
+    else 
+    {
+      console.log('else');
+      const data = [...evt.target.attributes];
+      const product = data.reduce((obj, node) => {
+        const attr = node.nodeName.replace('data-', '');
+        const value = node.nodeValue;
+        obj[attr] = value;
+        return obj;
+      }, {});
+      const newCart = [...cart, product];
+      setCartItems(newCart);
+    }
   }
 };
 
@@ -62,7 +76,7 @@ const templateToHTML = (template, item) => {
 const render = () => {
   const cartHTML = cart.map((item) => templateToHTML(template, item));
   cartListElement.innerHTML = cartHTML.join('\n');
-  const total = cart.reduce((acc, item) => acc += item.price * item.quantity, 0);
+  const total = cart.reduce((acc, item) => acc += parseInt(item.price) * parseFloat(item.quantity), 0);
   totalElement.innerText = total.toFixed(2).replace('.',',');
 
 };
